@@ -1,0 +1,16 @@
+<?php 
+    $product = $block->getProduct(); 
+    $title = $product->getName();
+ 
+    // If we have a release year attribute set 
+    // We can assume it's a movie and we will add this year to our title 
+    $releaseYear = $product->getYear() ?? '';
+    if ($releaseYear) {
+        $releaseYear = '(' . $releaseYear . ')';
+        $title = $title . ' ' . $releaseYear; 
+    }
+?>
+
+<h1>
+    <span> <?= $title ?></span>
+</h1>

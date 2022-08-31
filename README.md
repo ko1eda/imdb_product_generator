@@ -1,16 +1,18 @@
-# IMDB Movie Generator
+# Cadence IMDB Movie Generator
 
-### NOTES TO RUN 
+### Instructions to Run
 0. Git pull the code to your local machine. 
-1. Install magento following the recommended install instructions for the given version. If you are on warden I have included a custom warden env file that can be used to build this project, you can see warden instructions here 
+1. Install magento following the recommended install instructions for the given version. If you are on warden I have included a custom warden env file that can be used to build this project, you can see warden instructions here on their website.
 2. Assuming you have installed magento correctly, you should ensure this app is enabled by checking ```bin/magento module:status``` or checking the app/etc/config.php file 
 3. Assuming the app is installed correctly you should now have access to ```bin/magento movies:generatepopular``` command this will be used to generate the popular products from imdb with the given attributes 
 
 
+## Original Instructions
+
 1. Follow the instructions on this page ensure you have completed the prerequisites for running Magento 2 on your local (https://devdocs.magento.com/guides/v2.4/install-gde/prereq/prereq-overview.html)
 2. Configure you app/etc/env.php with the following values, remember to replace DB_NAME, USERNAME, PASSWORD, LOCAL_URL to match your local environment
 
-```php
+```
 <?php
 return [
     'backend' => [

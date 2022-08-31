@@ -5,6 +5,7 @@ namespace Cadence\Movie\Console\Gen;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Input\InputOption;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientFactory;
@@ -24,10 +25,13 @@ class Popular extends Command
     
 	const API_BASE_URI = 'https://api.themoviedb.org/3/movie/';
 	const API_POPULAR_URI = 'https://api.themoviedb.org/3/movie/popular';
-    const API_AUTH_V3_NO_BEARER = 'd7acd6403f2aba037a92a834d2af9097';
-
     /** The page number to the popular api, perhaps set this as a prameter to the command itself */
     const API_PAGE_NUMBER = 1;
+
+    /**
+     * @var string 
+     */
+    private string $API_AUTH_V3_NO_BEARER;
 
     /**
      * @var ResponseFactory
@@ -84,8 +88,12 @@ class Popular extends Command
 	{
 		$this->setName(self::NAME)
 			->setDescription(
-                'Pulls top movies from IMDB database.
-                Populates them as virtual products in your magento 2 catalogue labeled by category.'
+                "Pulls top movies from IMDB database and populates them as virtual products. Use with --api_key='' with your own custom V3 api_key generated from IMDB. This will only populate ites one time."
+            )
+            ->addOption(
+                'api_key',
+                null,
+                InputOption::VALUE_REQUIRED,
             );
 		parent::configure();
 	}
@@ -100,6 +108,13 @@ class Popular extends Command
 	{
         // Set the area access to adminhtml 
         $this->state->setAreaCode(\Magento\Framework\App\Area::AREA_ADMINHTML);
+
+        $api_key = $input->getOption('api_key');
+        if(!$api_key) {
+            $output->writeln('<info>--api_key="xxx" option needed when running this command, get this v3 api key from your imdb account.</info>');
+            return ; 
+        }
+        $this->API_AUTH_V3_NO_BEARER = $api_key;
 
         $output->writeln("Generating virtual products for popular imdb films...");
         $output->writeln("");
@@ -121,9 +136,11 @@ class Popular extends Command
 	}
 
     /**
+     * NOTE: If api key is not entered correctly in the terminal this method will throw an array offset error. 
+     * 
      * Fetch the necessary items from IMDB database, merging in the data from 3 endpoints
      * popular, details, credits and return an array of formatted items as raw associative array data
-     * OR temporary products (that need to be persisted to the db)
+     * OR temporary products (that need to be persisted to the db).
      * 
      * @param bool $convertArrayItemsToProducts : specifies if we convert each item to a product in this function 
      * or keep each item as an associative array to be converted later.
@@ -139,7 +156,7 @@ class Popular extends Command
         $resp = $this->doRequest(
             self::API_POPULAR_URI . 
             '?api_key=' . 
-            self::API_AUTH_V3_NO_BEARER . 
+            $this->API_AUTH_V3_NO_BEARER . 
             '&page='. 
             self::API_PAGE_NUMBER
         );
@@ -176,7 +193,7 @@ class Popular extends Command
                 self::API_BASE_URI . 
                 $item['sku'] . 
                 '?api_key=' .
-                self::API_AUTH_V3_NO_BEARER
+                $this->API_AUTH_V3_NO_BEARER
             );
             $responseBody = $resp->getBody();
             $responseContent = $responseBody->getContents(); 
@@ -202,7 +219,7 @@ class Popular extends Command
                 $item['sku'] . 
                 '/credits' .
                 '?api_key=' .
-                self::API_AUTH_V3_NO_BEARER
+                $this->API_AUTH_V3_NO_BEARER
             );
             $responseBody = $resp->getBody();
             $responseContent = $responseBody->getContents(); 
